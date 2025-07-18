@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import ReactMarkdown from "react-markdown";
+
 
 type QASectionProps = {
   pageText: string;
@@ -7,16 +9,34 @@ type QASectionProps = {
 const QASection: React.FC<QASectionProps> = ({ pageText }) => {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!question.trim()) return;
+    setLoading(true);
+    setAnswer(null);
 
-    // For now, just echo the user question and PDF text.
-    // You'll send to AI backend later.
-    setAnswer(
-      `You asked: "${question}"\n\n(Text from page as context:)\n${pageText || "(No text found on current page)"}`
-    );
+    try {
+      const res = await fetch("http://127.0.0.1:8000/api/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question,
+          context: pageText,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Backend error: " + res.status);
+      const data = await res.json();
+      // Adjust the path below to match your backend's exact JSON return
+      console.log("Response data:", data);
+      setAnswer(data.choices?.[0]?.message?.content || "No answer");
+    } catch (err: any) {
+      setAnswer("Error: " + err.message);
+    }
+
+    setLoading(false);
   };
 
   return (
@@ -32,15 +52,35 @@ const QASection: React.FC<QASectionProps> = ({ pageText }) => {
         <button
           type="submit"
           className="bg-blue-600 text-white px-5 py-2 rounded font-semibold hover:bg-blue-700"
+          disabled={loading}
         >
-          Ask
+          {loading ? "Thinking..." : "Ask"}
         </button>
       </form>
       {answer && (
-        <div className="mt-2 p-3 bg-gray-50 rounded text-sm whitespace-pre-wrap">
-          {answer}
+  <div className="mt-4 flex w-full justify-center">
+    <div className="w-full max-w-xl">
+      <div className="flex gap-2 items-start">
+        {/* Optional icon */}
+        <div className="flex-shrink-0 pt-1">
+          <span className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-blue-100 text-blue-600 text-lg font-bold">
+            AI
+          </span>
         </div>
-      )}
+        <div className="flex-1">
+          <div className="bg-gray-50 border border-blue-100 rounded-lg p-3 shadow-sm transition-colors">
+            <div className="mb-1 font-semibold text-blue-700 text-sm">AI Answer:</div>
+            <div className="prose prose-blue whitespace-pre-line text-gray-800 text-base leading-relaxed">
+              <ReactMarkdown>{answer}</ReactMarkdown>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+
     </div>
   );
 };
