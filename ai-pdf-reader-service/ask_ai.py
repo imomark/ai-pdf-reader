@@ -14,7 +14,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-PERPLEXITY_API_KEY = os.getenv("PERPLEXITY_API_KEY")
+PERPLEXITY_API_KEY = "<your key here>"  # Replace with your actual Perplexity API key
 
 @app.post("/api/ask")
 async def ask_question(request: Request):
@@ -28,9 +28,9 @@ async def ask_question(request: Request):
     }
 
     payload = {
-        "model": "mistral-7b-instruct",  # or "mixtral-8x7b-instruct"
+        "model": "sonar-pro",  # or "mixtral-8x7b-instruct"
         "messages": [
-            { "role": "user", "content": f"Answer the question: {question}\n\nContext:\n{context}" }
+            { "role": "user","content": f"Answer the question concisely: {question}\n\nBe brief and to-the-point. Use the following context:\n{context}" }
         ]
     }
 
