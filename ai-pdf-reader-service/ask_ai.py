@@ -14,7 +14,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-PERPLEXITY_API_KEY = "<your key here>"  # Replace with your actual Perplexity API key
+PERPLEXITY_API_KEY = "key"
 
 @app.post("/api/ask")
 async def ask_question(request: Request):
