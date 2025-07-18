@@ -1,14 +1,20 @@
 import React, { useRef, useState } from "react";
 
-const UploadSection: React.FC = () => {
+// Add this to the top:
+type UploadSectionProps = {
+  setSelectedFile: (file: File | null) => void;
+};
+
+const UploadSection: React.FC<UploadSectionProps> = ({ setSelectedFile }) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFile] = useState<File | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
-    }
-  };
+  if (e.target.files && e.target.files[0]) {
+    setSelectedFile(e.target.files[0]);
+  }
+};
+
 
   const handleUploadButton = () => {
     inputRef.current?.click();
